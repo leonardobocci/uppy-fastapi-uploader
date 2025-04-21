@@ -1,0 +1,53 @@
+import { Box, Container, Heading } from "@chakra-ui/react"
+import { createFileRoute } from "@tanstack/react-router"
+import { Dashboard } from "@uppy/react"
+import Uppy from "@uppy/core"
+import XHRUpload from "@uppy/xhr-upload"
+import "@uppy/core/dist/style.min.css"
+import "@uppy/dashboard/dist/style.min.css"
+import useAuth from "@/hooks/useAuth"
+
+export const Route = createFileRoute("/_layout/upload")({
+  component: Upload,
+})
+
+function Upload() {
+  const { user: currentUser } = useAuth()
+  const token = localStorage.getItem("access_token")
+
+  const uppy = new Uppy({
+    restrictions: {
+      maxFileSize: 10000000, // 10MB
+      maxNumberOfFiles: 5,
+      allowedFileTypes: [".parquet", ".csv", ".json", ".xml", ".txt", ".xlsx", ".xls", ".xlsb", ".xlsm"],
+    },
+  }).use(XHRUpload, {
+    endpoint: `${import.meta.env.VITE_API_URL}/api/v1/uploads`,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+
+  if (!currentUser) {
+    return null
+  }
+
+  return (
+    <Container maxW="container.xl" py={8}>
+      <Heading as="h1" size="xl" mb={8}>
+        File Upload
+      </Heading>
+      <Box bg="white" p={4} borderRadius="md" boxShadow="sm">
+        <Dashboard
+          uppy={uppy}
+          height={400}
+          showProgressDetails={true}
+          width="100%"
+          proudlyDisplayPoweredByUppy={false}
+        />
+      </Box>
+    </Container>
+  )
+}
+
+export default Upload
