@@ -1,6 +1,7 @@
 import { Container, Text } from "@chakra-ui/react"
 import { createFileRoute } from "@tanstack/react-router"
 import { Dashboard } from "@uppy/react"
+import { useColorModeValue } from "@/components/ui/color-mode"
 import Uppy from "@uppy/core"
 import "@uppy/core/dist/style.min.css"
 import "@uppy/dashboard/dist/style.min.css"
@@ -16,6 +17,7 @@ function Upload() {
   const { user: currentUser } = useAuth()
   const token = localStorage.getItem("access_token")
   const allowed_file_types = [".parquet", ".csv", ".json", ".xml", ".txt", ".xlsx", ".xls", ".xlsb", ".xlsm", ".avro", ".orc"]
+  const uppyTheme = useColorModeValue("light", "dark")
 
   const uppy = new Uppy({
     restrictions: {
@@ -46,7 +48,7 @@ function Upload() {
         height={400}
         width="100%"
         proudlyDisplayPoweredByUppy={false}
-        theme='auto'
+        theme={uppyTheme === "light" ? "light" : "dark"}
         note={`Up to 50GB, allowed formats: ${allowed_file_types.join(" ")}`}
       />
     </Container>
