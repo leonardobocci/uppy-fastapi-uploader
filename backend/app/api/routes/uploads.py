@@ -2,7 +2,8 @@ import uuid
 from pathlib import Path
 from typing import Annotated, Any
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, File, HTTPException, UploadFile, status
+from fastapi.responses import JSONResponse
 
 from app.api.deps import CurrentUser
 from app.core.config import settings
@@ -20,6 +21,8 @@ ALLOWED_EXTENSIONS = [
     ".xls",
     ".xlsb",
     ".xlsm",
+    ".avro",
+    ".orc",
 ]
 
 
@@ -27,36 +30,37 @@ def validate_file_extension(filename: str) -> bool:
     return Path(filename).suffix.lower() in ALLOWED_EXTENSIONS
 
 
-@router.post("/", response_model=Message)
+@router.post("/", response_model=Message, status_code=status.HTTP_201_CREATED)
 async def upload_files(
     current_user: CurrentUser,
-    files: Annotated[list[UploadFile], File(...)],
+    file: UploadFile,
 ) -> Any:
     """
-    Upload multiple files with security checks.
+    Validate and save an uploaded file.
     """
-    # Create user-specific upload directory if it doesn't exist
-    upload_dir = Path(settings.UPLOAD_DIR) / str(current_user.id)
-    upload_dir.mkdir(parents=True, exist_ok=True)
 
-    for file in files:
-        # Validate file extension
-        if not validate_file_extension(file.filename):
-            raise HTTPException(
-                status_code=400, detail=f"File extension not allowed: {file.filename}"
-            )
+    if not file:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="No file was uploaded"
+        )
+    
+    if not validate_file_extension(file.filename):
+        raise HTTPException(
+            status_code=415, detail=f"File extension not allowed: {file.filename}"
+        )
 
-        # Generate safe filename
-        ext = Path(file.filename).suffix.lower()
-        safe_filename = f"{uuid.uuid4()}{ext}"
-        file_path = upload_dir / safe_filename
+    # Assign random uuid instead of filename
+    extension = Path(file.filename).suffix.lower()
+    safe_filename = f"{uuid.uuid4()}{extension}"
+    file_path = Path().resolve() / Path(settings.UPLOAD_DIR) / safe_filename
 
-        # Save file to disk
-        try:
-            contents = await file.read()
-            with open(file_path, "wb") as f:
-                f.write(contents)
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error saving file: {str(e)}")
+    # Save file to disk
+    try:
+        contents = await file.read()
+        with open(file_path, "wb") as f:
+            f.write(contents)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error saving file: {str(e)}")
 
     return Message(message="Files uploaded successfully")

@@ -2,6 +2,8 @@ import { Box, Container, Text } from "@chakra-ui/react"
 import { createFileRoute } from "@tanstack/react-router"
 import { Dashboard } from "@uppy/react"
 import Uppy from "@uppy/core"
+import "@uppy/core/dist/style.min.css"
+import "@uppy/dashboard/dist/style.min.css"
 import XHRUpload from "@uppy/xhr-upload"
 
 import useAuth from "@/hooks/useAuth"
@@ -16,9 +18,9 @@ function Upload() {
 
   const uppy = new Uppy({
     restrictions: {
-      maxFileSize: 10000000, // 10MB
+      maxFileSize: 5e+10, // 50GB
       maxNumberOfFiles: 5,
-      allowedFileTypes: [".parquet", ".csv", ".json", ".xml", ".txt", ".xlsx", ".xls", ".xlsb", ".xlsm"],
+      allowedFileTypes: [".parquet", ".csv", ".json", ".xml", ".txt", ".xlsx", ".xls", ".xlsb", ".xlsm", ".avro", ".orc"],
     },
   }).use(XHRUpload, {
     endpoint: `${import.meta.env.VITE_API_URL}/api/v1/uploads`,
