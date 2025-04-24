@@ -1,4 +1,4 @@
-import { Box, Container, Text } from "@chakra-ui/react"
+import { Container, Text } from "@chakra-ui/react"
 import { createFileRoute } from "@tanstack/react-router"
 import { Dashboard } from "@uppy/react"
 import Uppy from "@uppy/core"
@@ -15,12 +15,13 @@ export const Route = createFileRoute("/_layout/")({
 function Upload() {
   const { user: currentUser } = useAuth()
   const token = localStorage.getItem("access_token")
+  const allowed_file_types = [".parquet", ".csv", ".json", ".xml", ".txt", ".xlsx", ".xls", ".xlsb", ".xlsm", ".avro", ".orc"]
 
   const uppy = new Uppy({
     restrictions: {
       maxFileSize: 5e+10, // 50GB
       maxNumberOfFiles: 5,
-      allowedFileTypes: [".parquet", ".csv", ".json", ".xml", ".txt", ".xlsx", ".xls", ".xlsb", ".xlsm", ".avro", ".orc"],
+      allowedFileTypes: allowed_file_types,
     },
   }).use(XHRUpload, {
     endpoint: `${import.meta.env.VITE_API_URL}/api/v1/uploads`,
@@ -38,14 +39,14 @@ function Upload() {
       <Text fontSize="2xl" truncate maxW="m">
         Upload files as {currentUser?.full_name || currentUser?.email}
       </Text>
-      <Box bg="white" p={4} borderRadius="md" boxShadow="sm">
-        <Dashboard
-          uppy={uppy}
-          height={400}
-          width="100%"
-          proudlyDisplayPoweredByUppy={false}
-        />
-      </Box>
+      <Dashboard
+        uppy={uppy}
+        height={400}
+        width="100%"
+        proudlyDisplayPoweredByUppy={false}
+        theme='auto'
+        note={`Up to 50GB, allowed formats: ${allowed_file_types.join(" ")}`}
+      />
     </Container>
   )
 }

@@ -1,9 +1,8 @@
 import uuid
 from pathlib import Path
-from typing import Annotated, Any
+from typing import Any
 
-from fastapi import APIRouter, File, HTTPException, UploadFile, status
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, HTTPException, UploadFile, status
 
 from app.api.deps import CurrentUser
 from app.core.config import settings
@@ -42,9 +41,9 @@ async def upload_files(
     if not file:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="No file was uploaded"
+            detail="No file was uploaded",
         )
-    
+
     if not validate_file_extension(file.filename):
         raise HTTPException(
             status_code=415, detail=f"File extension not allowed: {file.filename}"
