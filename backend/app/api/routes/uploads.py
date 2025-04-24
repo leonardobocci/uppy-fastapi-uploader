@@ -1,3 +1,4 @@
+import os
 import uuid
 from pathlib import Path
 from typing import Any
@@ -31,8 +32,8 @@ def validate_file_extension(filename: str) -> bool:
 
 @router.post("/", response_model=Message, status_code=status.HTTP_201_CREATED)
 async def upload_files(
-    current_user: CurrentUser,
     file: UploadFile,
+    current_user: CurrentUser,
 ) -> Any:
     """
     Validate and save an uploaded file.
@@ -52,7 +53,11 @@ async def upload_files(
     # Assign random uuid instead of filename
     extension = Path(file.filename).suffix.lower()
     safe_filename = f"{uuid.uuid4()}{extension}"
-    file_path = Path().resolve() / Path(settings.UPLOAD_DIR) / safe_filename
+    directory = os.path.join(
+        Path().resolve(), settings.UPLOAD_DIR, str(current_user.id)
+    )
+    os.makedirs(directory, exist_ok=True)
+    file_path = os.path.join(directory, safe_filename)
 
     # Save file to disk
     try:

@@ -20,19 +20,21 @@ function Upload() {
   const uppy = new Uppy({
     restrictions: {
       maxFileSize: 5e+10, // 50GB
-      maxNumberOfFiles: 5,
+      maxNumberOfFiles: 10,
       allowedFileTypes: allowed_file_types,
-    },
-  }).use(XHRUpload, {
-    endpoint: `${import.meta.env.VITE_API_URL}/api/v1/uploads`,
-    headers: {
-      Authorization: `Bearer ${token}`,
     },
   })
 
   if (!currentUser) {
     return null
   }
+
+  uppy.use(XHRUpload, {
+    endpoint: `${import.meta.env.VITE_API_URL}/api/v1/uploads/`,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
 
   return (
     <Container maxW="container.xl" py={8}>
