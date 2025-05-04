@@ -80,6 +80,7 @@ services:
     # TODO: remove once coverage is done locally
     volumes:
       - ./backend/htmlcov:/app/htmlcov
+      - /home/leo/demo_uploader_dagster:/app/uploads
     environment:
       SMTP_HOST: "mailcatcher"
       SMTP_PORT: "1025"

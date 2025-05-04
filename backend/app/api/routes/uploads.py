@@ -1,13 +1,14 @@
 import os
 import uuid
 from pathlib import Path
-from typing import Any
+from typing import Any, Annotated
 
-from fastapi import APIRouter, HTTPException, UploadFile, status
+from fastapi import APIRouter, HTTPException, UploadFile, status, Form
 
 from app.api.deps import CurrentUser
 from app.core.config import settings
 from app.models import Message
+import datetime as dt
 
 router = APIRouter(prefix="/uploads", tags=["uploads"])
 
@@ -34,6 +35,7 @@ def validate_file_extension(filename: str) -> bool:
 async def upload_files(
     file: UploadFile,
     current_user: CurrentUser,
+    file_datetime: Annotated[str, Form()]
 ) -> Any:
     """
     Validate and save an uploaded file.
@@ -50,11 +52,12 @@ async def upload_files(
             status_code=415, detail=f"File extension not allowed: {file.filename}"
         )
 
-    # Assign random uuid instead of filename
+    # Assign random uuid instead of filename and save in timestamped directory
     extension = Path(file.filename).suffix.lower()
     safe_filename = f"{uuid.uuid4()}{extension}"
+    file_date = dt.datetime.fromisoformat(file_datetime)
     directory = os.path.join(
-        Path().resolve(), settings.UPLOAD_DIR, str(current_user.id)
+        Path().resolve(), settings.UPLOAD_DIR, str(current_user.id), str(round(file_date.timestamp()))
     )
     os.makedirs(directory, exist_ok=True)
     file_path = os.path.join(directory, safe_filename)

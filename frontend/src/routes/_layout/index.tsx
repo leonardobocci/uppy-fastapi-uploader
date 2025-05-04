@@ -25,6 +25,9 @@ function Upload() {
       maxNumberOfFiles: 10,
       allowedFileTypes: allowed_file_types,
     },
+    meta: {
+      file_datetime: new Date().toISOString(),
+    },
   })
 
   if (!currentUser) {
@@ -43,6 +46,11 @@ function Upload() {
       <Text fontSize="2xl" truncate maxW="m">
         Upload files as {currentUser?.full_name || currentUser?.email}
       </Text>
+      <Text>
+        By default, the file datetime is set to the current date and time in UTC timezone. <br />
+        You can change it by clicking the edit button for each file. <br />
+        When loading the file, the most recent records will be selected based on this field.
+      </Text>
       <Dashboard
         uppy={uppy}
         height={400}
@@ -50,6 +58,9 @@ function Upload() {
         proudlyDisplayPoweredByUppy={false}
         theme={uppyTheme === "light" ? "light" : "dark"}
         note={`Up to 50GB, allowed formats: ${allowed_file_types.join(" ")}`}
+        metaFields={[
+          { id: 'file_datetime', name: 'File Datetime', placeholder: 'This will be used to select the most recent records.' }
+        ]}
       />
     </Container>
   )
