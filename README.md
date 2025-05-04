@@ -24,3 +24,5 @@ Now any uploaded files will land into the target local dir. \
 They can be picked up by dagster sensors and processed further.
 
 Forked from [Fastapi full stack template](https://github.com/fastapi/full-stack-fastapi-template). See that repo for details of repo structure.
+
+![demo image](image.png)
